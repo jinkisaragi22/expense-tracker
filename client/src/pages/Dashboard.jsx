@@ -8,6 +8,7 @@ import { useAuthStore } from '../store/auth';
 import { money, moneyCompact, signedMoney, monthLabel, thisMonth } from '../lib/money';
 import { Field, inputCls, btnPrimary, btnGhost, ErrorNote } from '../components/Field';
 import Modal from '../components/Modal';
+import MoneyInput from '../components/MoneyInput';
 import { apiError } from '../api/client';
 
 const INCOME = '#1f8a70';
@@ -176,7 +177,7 @@ export default function Dashboard() {
 }
 
 function StartingBalanceForm({ month, current, onCancel, onSaved }) {
-  const [amount, setAmount] = useState(current != null ? String(current) : '');
+  const [amount, setAmount] = useState(current != null ? String(Math.round(current)) : '');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -200,17 +201,7 @@ function StartingBalanceForm({ month, current, onCancel, onSaved }) {
       </p>
       <ErrorNote>{error}</ErrorNote>
       <Field label="Amount">
-        <input
-          type="number"
-          step="any"
-          min="0"
-          required
-          autoFocus
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className={`${inputCls} amount`}
-          placeholder="1000000"
-        />
+        <MoneyInput required autoFocus value={amount} onChange={setAmount} placeholder="1.000.000" />
       </Field>
       <div className="flex justify-end gap-2 pt-2">
         <button type="button" onClick={onCancel} className={btnGhost}>Cancel</button>

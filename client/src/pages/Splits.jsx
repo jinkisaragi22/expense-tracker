@@ -4,6 +4,7 @@ import { money } from '../lib/money';
 import Modal from '../components/Modal';
 import { Field, inputCls, btnPrimary, btnGhost, ErrorNote } from '../components/Field';
 import ReceiptScanner from '../components/ReceiptScanner';
+import MoneyInput from '../components/MoneyInput';
 
 export default function Splits() {
   const [splits, setSplits] = useState(null);
@@ -141,9 +142,9 @@ export default function Splits() {
 function SplitForm({ initial, onCancel, onSaved }) {
   const [title, setTitle] = useState(initial?.title ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
-  const [total, setTotal] = useState(initial?.total != null ? String(initial.total) : '');
+  const [total, setTotal] = useState(initial?.total != null ? String(Math.round(initial.total)) : '');
   const [participants, setParticipants] = useState(
-    initial?.participants.map((p) => ({ name: p.name, amount: String(p.amount), paid: p.paid }))
+    initial?.participants.map((p) => ({ name: p.name, amount: String(Math.round(p.amount)), paid: p.paid }))
       ?? [{ name: '', amount: '', paid: false }, { name: '', amount: '', paid: false }]
   );
   const [error, setError] = useState('');
@@ -157,13 +158,13 @@ function SplitForm({ initial, onCancel, onSaved }) {
     const t = Number(total);
     const n = participants.length;
     if (!t || !n) return;
-    const base = Math.floor((t / n) * 100) / 100;
-    const remainder = Math.round((t - base * n) * 100) / 100;
-    setParticipants((ps) => ps.map((p, i) => ({ ...p, amount: String(i === 0 ? Math.round((base + remainder) * 100) / 100 : base) })));
+    const base = Math.floor(t / n);
+    const remainder = t - base * n;
+    setParticipants((ps) => ps.map((p, i) => ({ ...p, amount: String(i === 0 ? base + remainder : base) })));
   }
 
   const assigned = participants.reduce((a, p) => a + (Number(p.amount) || 0), 0);
-  const diff = Math.round(((Number(total) || 0) - assigned) * 100) / 100;
+  const diff = (Number(total) || 0) - assigned;
 
   async function submit(e) {
     e.preventDefault();
@@ -194,7 +195,7 @@ function SplitForm({ initial, onCancel, onSaved }) {
       <ReceiptScanner onPickAmount={(value) => setTotal(String(value))} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Total amount">
-          <input type="number" step="any" min="1" required value={total} onChange={(e) => setTotal(e.target.value)} className={`${inputCls} amount`} placeholder="300000" />
+          <MoneyInput required value={total} onChange={setTotal} placeholder="300.000" />
         </Field>
         <Field label="Note (optional)">
           <input maxLength={255} value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} placeholder="e.g. Pay via GoPay" />
@@ -219,14 +220,11 @@ function SplitForm({ initial, onCancel, onSaved }) {
                 className={inputCls}
                 placeholder={`Person ${i + 1}`}
               />
-              <input
-                type="number"
-                step="any"
-                min="0"
+              <MoneyInput
                 required
                 value={p.amount}
-                onChange={(e) => setP(i, 'amount', e.target.value)}
-                className={`${inputCls} amount w-32 shrink-0`}
+                onChange={(v) => setP(i, 'amount', v)}
+                className="w-36 shrink-0"
                 placeholder="0"
               />
               <button

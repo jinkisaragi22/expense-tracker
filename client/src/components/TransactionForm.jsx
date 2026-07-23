@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { api, apiError } from '../api/client';
 import { Field, inputCls, btnPrimary, btnGhost, ErrorNote } from './Field';
+import MoneyInput from './MoneyInput';
 import { today } from '../lib/money';
 
 export default function TransactionForm({ categories, initial, onSaved, onCancel, lockType = false }) {
   const [type, setType] = useState(initial?.type ?? 'expense');
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? '');
-  const [amount, setAmount] = useState(initial?.amount != null ? String(initial.amount) : '');
+  const [amount, setAmount] = useState(initial?.amount != null ? String(Math.round(initial.amount)) : '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [date, setDate] = useState(initial?.date ?? today());
   const [error, setError] = useState('');
@@ -51,7 +52,7 @@ export default function TransactionForm({ categories, initial, onSaved, onCancel
         ))}
       </div>
       <Field label="Amount">
-        <input type="number" step="any" min="1" required value={amount} onChange={(e) => setAmount(e.target.value)} className={`${inputCls} amount`} placeholder="50000" />
+        <MoneyInput required value={amount} onChange={setAmount} placeholder="50.000" />
       </Field>
       <Field label="Category">
         <select required value={validCategory} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>

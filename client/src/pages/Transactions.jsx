@@ -88,11 +88,11 @@ export default function Transactions() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
-              <th className="px-4 py-3 font-medium">Date</th>
-              <th className="px-4 py-3 font-medium">Category</th>
-              <th className="px-4 py-3 font-medium">Description</th>
-              <th className="px-4 py-3 font-medium text-right">Amount</th>
-              <th className="px-4 py-3" />
+              <th className="px-2.5 py-2.5 sm:px-4 sm:py-3 font-medium">Date</th>
+              <th className="px-2.5 py-2.5 sm:px-4 sm:py-3 font-medium">Category</th>
+              <th className="px-2.5 py-2.5 sm:px-4 sm:py-3 font-medium">Description</th>
+              <th className="px-2.5 py-2.5 sm:px-4 sm:py-3 font-medium text-right">Amount</th>
+              <th className="px-2.5 py-2.5 sm:px-4 sm:py-3" />
             </tr>
           </thead>
           <tbody>
@@ -105,16 +105,16 @@ export default function Transactions() {
             )}
             {data?.transactions.map((tx) => (
               <tr key={tx.id} className="border-b border-line last:border-0 hover:bg-surface/60">
-                <td className="amount px-4 py-3 whitespace-nowrap text-muted">{tx.date}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="amount px-2.5 py-2.5 sm:px-4 sm:py-3 whitespace-nowrap text-muted">{tx.date}</td>
+                <td className="px-2.5 py-2.5 sm:px-4 sm:py-3 whitespace-nowrap">
                   <span className="mr-1.5" aria-hidden>{tx.category.icon}</span>
                   {tx.category.name}
                 </td>
-                <td className="px-4 py-3 max-w-55 truncate text-muted">{tx.description || '—'}</td>
-                <td className={`amount px-4 py-3 text-right font-medium whitespace-nowrap ${tx.type === 'income' ? 'text-brand-dark' : 'text-expense'}`}>
+                <td className="px-2.5 py-2.5 sm:px-4 sm:py-3 max-w-55 truncate text-muted">{tx.description || '—'}</td>
+                <td className={`amount px-2.5 py-2.5 sm:px-4 sm:py-3 text-right font-medium whitespace-nowrap ${tx.type === 'income' ? 'text-brand-dark' : 'text-expense'}`}>
                   {signedMoney(tx.amount, tx.type)}
                 </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
+                <td className="px-2.5 py-2.5 sm:px-4 sm:py-3 text-right whitespace-nowrap">
                   <button onClick={() => setModal(tx)} className="text-xs text-muted hover:text-ink cursor-pointer mr-3">Edit</button>
                   <button onClick={() => setConfirmDelete(tx)} className="text-xs text-expense/80 hover:text-expense cursor-pointer">Delete</button>
                 </td>
