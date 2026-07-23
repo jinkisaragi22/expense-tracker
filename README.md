@@ -12,6 +12,9 @@ CashTrail — A full-stack personal finance tracker built with React and Express
 - Per-user categories (13 sensible defaults seeded on signup, plus custom ones with icon & color)
 - Dashboard: per-month starting balance, monthly summary tiles, 6-month income-vs-expense trend, spending by category
 - Transaction filters: date range, category, type, description search, pagination
+- Split bills: divide a bill among friends, track who has paid, and share a public read-only link
+- Receipt OCR: scan a receipt with the phone camera to fill in the bill total (client-side tesseract.js — the photo never leaves the device)
+- Installable PWA with offline app shell (service worker + web manifest)
 
 Planned: recurring transactions, budgets with alerts, CSV/PDF export, multi-currency.
 
@@ -80,6 +83,9 @@ In production the client and API share one origin, so no CORS config is needed.
 | GET | `/api/analytics/summary?month=YYYY-MM` | Income / expense / balance for a month |
 | GET | `/api/analytics/balance` | All-time income, expense, and total balance |
 | PUT | `/api/analytics/starting-balance` | Set/update a month's starting balance (`{ month, amount }`) |
+| GET/POST/PUT/DELETE | `/api/splits[/:id]` | Split bill CRUD |
+| PATCH | `/api/splits/:id/participants/:pid` | Mark a participant paid/unpaid |
+| GET | `/api/splits/shared/:token` | Public read-only view of a shared split (no auth) |
 | GET | `/api/analytics/by-category?month=YYYY-MM` | Spend grouped by category |
 | GET | `/api/analytics/trend?months=N` | Monthly income/expense series |
 

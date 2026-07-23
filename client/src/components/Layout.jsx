@@ -5,6 +5,7 @@ const nav = [
   { to: '/', label: 'Dashboard', icon: '◧' },
   { to: '/transactions', label: 'Transactions', icon: '⇄' },
   { to: '/categories', label: 'Categories', icon: '⬡' },
+  { to: '/splits', label: 'Split bills', icon: '⋔' },
 ];
 
 export default function Layout() {
