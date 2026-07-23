@@ -1,0 +1,15 @@
+export const DEFAULT_CATEGORIES = [
+  { name: 'Food & Dining', type: 'expense', icon: '🍔', color: '#f59e0b' },
+  { name: 'Transport', type: 'expense', icon: '🚗', color: '#3b82f6' },
+  { name: 'Rent & Housing', type: 'expense', icon: '🏠', color: '#8b5cf6' },
+  { name: 'Groceries', type: 'expense', icon: '🛒', color: '#10b981' },
+  { name: 'Utilities', type: 'expense', icon: '💡', color: '#eab308' },
+  { name: 'Entertainment', type: 'expense', icon: '🎬', color: '#ec4899' },
+  { name: 'Health', type: 'expense', icon: '🏥', color: '#ef4444' },
+  { name: 'Shopping', type: 'expense', icon: '🛍️', color: '#f97316' },
+  { name: 'Other Expense', type: 'expense', icon: '📦', color: '#64748b' },
+  { name: 'Salary', type: 'income', icon: '💼', color: '#22c55e' },
+  { name: 'Freelance', type: 'income', icon: '💻', color: '#14b8a6' },
+  { name: 'Investments', type: 'income', icon: '📈', color: '#06b6d4' },
+  { name: 'Other Income', type: 'income', icon: '💰', color: '#84cc16' },
+];
