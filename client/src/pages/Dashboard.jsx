@@ -6,9 +6,9 @@ import {
 import { api } from '../api/client';
 import { useAuthStore } from '../store/auth';
 import { money, moneyCompact, signedMoney, monthLabel, thisMonth } from '../lib/money';
-import { inputCls } from '../components/Field';
+import { Field, inputCls, btnPrimary, btnGhost, ErrorNote } from '../components/Field';
 import Modal from '../components/Modal';
-import TransactionForm from '../components/TransactionForm';
+import { apiError } from '../api/client';
 
 const INCOME = '#1f8a70';
 const EXPENSE = '#b3541e';
@@ -20,9 +20,7 @@ export default function Dashboard() {
   const [byCategory, setByCategory] = useState([]);
   const [trend, setTrend] = useState([]);
   const [recent, setRecent] = useState([]);
-  const [wallet, setWallet] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [addBalance, setAddBalance] = useState(false);
+  const [editStart, setEditStart] = useState(false);
 
   const loadMonth = useCallback(() => {
     api.get('/analytics/summary', { params: { month } }).then(({ data }) => setSummary(data));
@@ -30,16 +28,12 @@ export default function Dashboard() {
   }, [month]);
 
   const loadGlobal = useCallback(() => {
-    api.get('/analytics/balance').then(({ data }) => setWallet(data));
     api.get('/analytics/trend', { params: { months: 6 } }).then(({ data }) => setTrend(data.trend));
     api.get('/transactions', { params: { pageSize: 6 } }).then(({ data }) => setRecent(data.transactions));
   }, []);
 
   useEffect(() => { loadMonth(); }, [loadMonth]);
-  useEffect(() => {
-    loadGlobal();
-    api.get('/categories').then(({ data }) => setCategories(data.categories)).catch(() => {});
-  }, [loadGlobal]);
+  useEffect(() => { loadGlobal(); }, [loadGlobal]);
 
   const balancePositive = (summary?.balance ?? 0) >= 0;
 
@@ -59,29 +53,28 @@ export default function Dashboard() {
             aria-label="Month"
           />
           <button
-            onClick={() => setAddBalance(true)}
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-brand px-4 text-sm font-medium text-white shadow-sm hover:bg-brand-dark cursor-pointer"
+            onClick={() => setEditStart(true)}
+            className="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-lg bg-brand px-4 text-sm font-medium text-white shadow-sm hover:bg-brand-dark cursor-pointer"
           >
-            <span aria-hidden className="text-base leading-none">＋</span>
-            Add balance
+            Set starting balance
           </button>
         </div>
       </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile
-          label="Total balance"
-          value={wallet ? money(wallet.balance) : '—'}
-          accent={(wallet?.balance ?? 0) >= 0 ? 'text-brand-dark' : 'text-expense'}
-          sub="All time"
+          label="Starting balance"
+          value={summary ? money(summary.startingBalance) : '—'}
+          accent="text-ink"
+          sub={summary && !summary.hasStartingBalance ? 'Not set for this month' : monthLabel(month)}
         />
         <StatTile label="Income" value={summary ? money(summary.income) : '—'} accent="text-brand-dark" sub={monthLabel(month)} />
         <StatTile label="Expenses" value={summary ? money(summary.expense) : '—'} accent="text-expense" sub={monthLabel(month)} />
         <StatTile
-          label="Net this month"
-          value={summary ? money(summary.balance) : '—'}
-          accent={balancePositive ? 'text-brand-dark' : 'text-expense'}
-          sub={summary ? `${summary.transactionCount} transactions` : ''}
+          label="Month-end balance"
+          value={summary ? money(summary.endingBalance) : '—'}
+          accent={(summary?.endingBalance ?? 0) >= 0 ? 'text-brand-dark' : 'text-expense'}
+          sub={summary ? `${balancePositive ? '+' : '−'}${money(Math.abs(summary.balance))} net · ${summary.transactionCount} transactions` : ''}
         />
       </div>
 
@@ -168,19 +161,64 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {addBalance && (
-        <Modal title="Add balance" onClose={() => setAddBalance(false)}>
-          <p className="mb-4 text-sm text-muted">Record money coming in — salary, a top-up, or any other income.</p>
-          <TransactionForm
-            categories={categories}
-            initial={{ type: 'income' }}
-            lockType
-            onCancel={() => setAddBalance(false)}
-            onSaved={() => { setAddBalance(false); loadMonth(); loadGlobal(); }}
+      {editStart && (
+        <Modal title={`Starting balance · ${monthLabel(month)}`} onClose={() => setEditStart(false)}>
+          <StartingBalanceForm
+            month={month}
+            current={summary?.hasStartingBalance ? summary.startingBalance : null}
+            onCancel={() => setEditStart(false)}
+            onSaved={() => { setEditStart(false); loadMonth(); }}
           />
         </Modal>
       )}
     </div>
+  );
+}
+
+function StartingBalanceForm({ month, current, onCancel, onSaved }) {
+  const [amount, setAmount] = useState(current != null ? String(current) : '');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      await api.put('/analytics/starting-balance', { month, amount: Number(amount) });
+      onSaved();
+    } catch (err) {
+      setError(apiError(err));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="space-y-4">
+      <p className="text-sm text-muted">
+        How much money you're starting {monthLabel(month)} with. Income adds to it, expenses subtract, and the dashboard shows where you'll end the month.
+      </p>
+      <ErrorNote>{error}</ErrorNote>
+      <Field label="Amount">
+        <input
+          type="number"
+          step="any"
+          min="0"
+          required
+          autoFocus
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className={`${inputCls} amount`}
+          placeholder="1000000"
+        />
+      </Field>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" onClick={onCancel} className={btnGhost}>Cancel</button>
+        <button disabled={busy} className={btnPrimary}>
+          {busy ? 'Saving…' : current != null ? 'Update balance' : 'Set balance'}
+        </button>
+      </div>
+    </form>
   );
 }
 

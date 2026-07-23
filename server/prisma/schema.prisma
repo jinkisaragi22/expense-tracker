@@ -21,10 +21,22 @@ model User {
   passwordHash String?       @map("password_hash")
   googleId     String?       @unique @map("google_id")
   createdAt    DateTime      @default(now()) @map("created_at")
-  categories   Category[]
-  transactions Transaction[]
+  categories      Category[]
+  transactions    Transaction[]
+  monthlyBalances MonthlyBalance[]
 
   @@map("users")
+}
+
+model MonthlyBalance {
+  id     String  @id @default(uuid())
+  userId String  @map("user_id")
+  month  String
+  amount Decimal @db.Decimal(14, 2)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, month])
+  @@map("monthly_balances")
 }
 
 model Category {

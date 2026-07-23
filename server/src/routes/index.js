@@ -3,7 +3,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { register, login, me, googleAuth } from '../controllers/auth.js';
 import { listCategories, createCategory, updateCategory, deleteCategory } from '../controllers/categories.js';
 import { listTransactions, createTransaction, updateTransaction, deleteTransaction } from '../controllers/transactions.js';
-import { summary, byCategory, trend, balance } from '../controllers/analytics.js';
+import { summary, byCategory, trend, balance, setStartingBalance } from '../controllers/analytics.js';
 
 export const router = Router();
 
@@ -24,5 +24,6 @@ router.delete('/transactions/:id', requireAuth, deleteTransaction);
 
 router.get('/analytics/summary', requireAuth, summary);
 router.get('/analytics/balance', requireAuth, balance);
+router.put('/analytics/starting-balance', requireAuth, setStartingBalance);
 router.get('/analytics/by-category', requireAuth, byCategory);
 router.get('/analytics/trend', requireAuth, trend);

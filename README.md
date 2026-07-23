@@ -10,7 +10,7 @@ CashTrail — A full-stack personal finance tracker built with React and Express
 - All amounts in Indonesian Rupiah (IDR)
 - Income & expense transactions with full CRUD
 - Per-user categories (13 sensible defaults seeded on signup, plus custom ones with icon & color)
-- Dashboard: monthly summary tiles, 6-month income-vs-expense trend, spending by category
+- Dashboard: per-month starting balance, monthly summary tiles, 6-month income-vs-expense trend, spending by category
 - Transaction filters: date range, category, type, description search, pagination
 
 Planned: recurring transactions, budgets with alerts, CSV/PDF export, multi-currency.
@@ -79,6 +79,7 @@ In production the client and API share one origin, so no CORS config is needed.
 | GET/POST/PUT/DELETE | `/api/transactions[/:id]` | Transaction CRUD + filters (`from`, `to`, `category`, `type`, `search`, `page`, `pageSize`) |
 | GET | `/api/analytics/summary?month=YYYY-MM` | Income / expense / balance for a month |
 | GET | `/api/analytics/balance` | All-time income, expense, and total balance |
+| PUT | `/api/analytics/starting-balance` | Set/update a month's starting balance (`{ month, amount }`) |
 | GET | `/api/analytics/by-category?month=YYYY-MM` | Spend grouped by category |
 | GET | `/api/analytics/trend?months=N` | Monthly income/expense series |
 

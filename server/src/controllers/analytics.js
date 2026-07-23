@@ -24,7 +24,39 @@ export async function summary(req, res, next) {
     const income = Number(groups.find((g) => g.type === 'income')?._sum.amount ?? 0);
     const expense = Number(groups.find((g) => g.type === 'expense')?._sum.amount ?? 0);
     const count = groups.reduce((acc, g) => acc + g._count, 0);
-    res.json({ month: m, income, expense, balance: income - expense, transactionCount: count });
+    const mb = await prisma.monthlyBalance.findUnique({
+      where: { userId_month: { userId: req.userId, month: m } },
+    });
+    const startingBalance = Number(mb?.amount ?? 0);
+    res.json({
+      month: m,
+      income,
+      expense,
+      balance: income - expense,
+      startingBalance,
+      hasStartingBalance: mb !== null,
+      endingBalance: startingBalance + income - expense,
+      transactionCount: count,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+const startingBalanceSchema = z.object({
+  month: z.string().regex(/^\d{4}-\d{2}$/, 'Expected YYYY-MM'),
+  amount: z.coerce.number().min(0).max(999999999999),
+});
+
+export async function setStartingBalance(req, res, next) {
+  try {
+    const { month, amount } = startingBalanceSchema.parse(req.body);
+    const mb = await prisma.monthlyBalance.upsert({
+      where: { userId_month: { userId: req.userId, month } },
+      update: { amount },
+      create: { userId: req.userId, month, amount },
+    });
+    res.json({ month, startingBalance: Number(mb.amount) });
   } catch (err) {
     next(err);
   }
