@@ -51,6 +51,22 @@ The "Continue with Google" button only renders when `VITE_GOOGLE_CLIENT_ID` is s
 
 With the server running: `cd server && node smoke-test.mjs` (expects a `test@example.com` / `password123` account; register it first via the app or the register endpoint).
 
+## Deploying (Vercel + Supabase)
+
+One Vercel project serves both the React client (static) and the Express API (serverless function at `api/index.js`).
+
+1. **Supabase**: create a project at [supabase.com](https://supabase.com). From *Connect → ORMs/Prisma* copy both connection strings:
+   - Transaction pooler (port `6543`) → append `?pgbouncer=true` → this is `DATABASE_URL`
+   - Direct connection (port `5432`) → this is `DIRECT_URL`
+2. **Migrate**: locally, run `cd server && npx prisma migrate deploy` with those two values in `server/.env` (temporarily), then switch back to your local values.
+3. **Vercel**: import the repo at [vercel.com/new](https://vercel.com/new) (framework preset: Other; build settings come from `vercel.json`). Add env vars:
+   - `DATABASE_URL`, `DIRECT_URL` (from step 1)
+   - `JWT_SECRET` (long random string)
+   - `GOOGLE_CLIENT_ID` and `VITE_GOOGLE_CLIENT_ID` (optional, for Google sign-in)
+4. **Google OAuth**: add the deployed URL (e.g. `https://cashtrail.vercel.app`) to the OAuth client's Authorized JavaScript origins.
+
+In production the client and API share one origin, so no CORS config is needed.
+
 ## API overview
 
 | Method | Route | Description |

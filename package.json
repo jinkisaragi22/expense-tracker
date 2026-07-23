@@ -1,0 +1,13 @@
+{
+  "name": "cashtrail",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "build": "npm run generate --workspace=cashtrail-server && npm run build --workspace=client",
+    "dev:server": "npm run dev --workspace=cashtrail-server",
+    "dev:client": "npm run dev --workspace=client"
+  }
+}

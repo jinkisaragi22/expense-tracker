@@ -4,3 +4,4 @@ docs/
 .env
 *.local
 .DS_Store
+.vercel/
